@@ -19,8 +19,8 @@ pipeline {
 
         stage('Install & Build') {
             steps {
-                sh 'cd sample-app'
-                sh 'npm install'
+                sh 'cd sample-app && npm install'
+                // sh 'npm install'
                 // sh 'npm run build'
             }
         }
