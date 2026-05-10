@@ -1,0 +1,54 @@
+pipeline {
+    agent { label 'node' } // 绑定到有 Node 环境的 Agent
+
+    // tools {
+    //     nodejs 'node-20' // 在 Jenkins 全局工具配置中预设的名称
+    // }
+
+    environment {
+        APP_NAME = 'sample-app'
+        PORT = '3000'
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm // Multibranch Pipeline 会自动拉取对应分支代码
+            }
+        }
+
+        stage('Install & Build') {
+            steps {
+                sh 'cd sample-app'
+                sh 'npm install'
+                // sh 'npm run build'
+            }
+        }
+
+        stage('Deploy to QA') {
+            steps {
+                sh 'npm start'
+                // // 假设使用 pm2 部署在本地 QA 端口
+                // sh "pm2 stop ${APP_NAME} || true"
+                // sh "pm2 start npm --name ${APP_NAME} -- start"
+                // // 等待服务启动
+                sh "sleep 5" 
+            }
+        }
+
+        stage('Trigger E2E Test') {
+            when {
+                anyOf {
+                    branch 'main'
+                    branch 'develop'
+                }
+            }
+            steps {
+                // 触发 E2E 工程，并传递当前分支名作为参数，确保版本匹配
+                build job: 'Playwright_demo-pipeline/' + env.BRANCH_NAME, 
+                      wait: true, 
+                      parameters: [string(name: 'TARGET_URL', value: "http://localhost:${PORT}")]
+            }
+        }
+    }
+}
