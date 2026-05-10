@@ -27,10 +27,10 @@ pipeline {
 
         stage('Deploy to QA') {
             steps {
-                sh 'cd sample-app && npm start'
+                // sh 'cd sample-app && npm start'
                 // // 假设使用 pm2 部署在本地 QA 端口
-                // sh "pm2 stop ${APP_NAME} || true"
-                // sh "pm2 start npm --name ${APP_NAME} -- start"
+                sh "cd sample-app && pm2 stop ${APP_NAME} || true"
+                sh "cd sample-app && pm2 start npm --name ${APP_NAME} -- start"
                 // // 等待服务启动
                 sh "sleep 5" 
             }
